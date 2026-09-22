@@ -1,13 +1,21 @@
-# features.py
 """
 Feature definitions for the Iris feature repository:
-entity, data source, and feature view (schema + TTL).
+entity, data source, feature views, and feature service.
 """
+
 from datetime import timedelta
 
-from feast import Entity, FeatureService, FeatureView, Field, FileSource
+from feast import (
+    Entity,
+    FeatureView,
+    Field,
+    FileSource,
+    FeatureService,
+)
+
 from feast.types import Float32, String
 from feast.value_type import ValueType
+
 
 # ============================================================
 # ENTITY
@@ -19,6 +27,7 @@ sample = Entity(
     value_type=ValueType.INT64,
 )
 
+
 # ============================================================
 # DATA SOURCE
 # ============================================================
@@ -29,6 +38,7 @@ iris_source = FileSource(
     timestamp_field="event_timestamp",
     created_timestamp_column="created_timestamp",
 )
+
 
 # ============================================================
 # FEATURE VIEW 1
@@ -61,6 +71,7 @@ iris_measurements_fv = FeatureView(
     online=True,
 )
 
+
 # ============================================================
 # FEATURE VIEW 2
 # Engineered features
@@ -91,6 +102,7 @@ iris_engineered_fv = FeatureView(
     source=iris_source,
     online=True,
 )
+
 
 # ============================================================
 # FEATURE SERVICE

@@ -1,116 +1,138 @@
-from datetime import datetime, timezone
+import json
+import subprocess
+from datetime import datetime
 
 import pandas as pd
 
 from feast import FeatureStore
-
-from features import (
-    iris_engineered_fv,
-    iris_feature_service,
-    iris_measurements_fv,
-)
+from feast.data_source import PushMode
 
 
 def run_demo():
     store = FeatureStore(repo_path=".")
-    source_df = pd.read_parquet("data/iris_features.parquet")
-
-    print("\n--- Apply Iris feature definitions ---")
-    store.apply([iris_measurements_fv, iris_engineered_fv, iris_feature_service])
+    print("\n--- Run feast apply ---")
+    subprocess.run(["feast", "apply"])
 
     print("\n--- Historical features for training ---")
-    historical_df = fetch_historical_features(store, source_df)
-    print(historical_df.head())
-    assert len(historical_df) == 3
-    assert_expected_features(historical_df)
+    fetch_historical_features_entity_df(store, for_batch_scoring=False)
 
     print("\n--- Historical features for batch scoring ---")
-    batch_scoring_df = fetch_batch_scoring_features(store, source_df)
-    print(batch_scoring_df.head())
-    assert len(batch_scoring_df) == 3
-    assert_expected_features(batch_scoring_df)
+    fetch_historical_features_entity_df(store, for_batch_scoring=True)
 
     print("\n--- Load features into online store ---")
-    store.materialize_incremental(end_date=datetime.now(timezone.utc))
+    store.materialize_incremental(end_date=datetime.now())
 
     print("\n--- Online features ---")
-    online_df = fetch_online_features(store)
-    print(online_df)
-    assert len(online_df) == 2
-    assert_online_features(online_df)
+    fetch_online_features(store)
 
-    print("\n--- Online features retrieved through the feature service ---")
-    service_online_df = fetch_online_features(store, use_feature_service=True)
-    print(service_online_df)
-    assert_online_features(service_online_df)
+    print("\n--- Online features retrieved (instead) through a feature service---")
+    fetch_online_features(store, source="feature_service")
 
-    print("\nIris Feast workflow completed successfully.")
+    print(
+        "\n--- Online features retrieved (using feature service v3, which uses a feature view with a push source---"
+    )
+    fetch_online_features(store, source="push")
+
+    print("\n--- Simulate a stream event ingestion of the hourly stats df ---")
+    event_df = pd.DataFrame.from_dict(
+        {
+            "driver_id": [1001],
+            "event_timestamp": [
+                datetime.now(),
+            ],
+            "created": [
+                datetime.now(),
+            ],
+            "conv_rate": [1.0],
+            "acc_rate": [1.0],
+            "avg_daily_trips": [1000],
+            "driver_metadata": [{"vehicle_type": "truck", "rating": "5.0"}],
+            "driver_config": [
+                json.dumps({"max_distance_km": 500, "preferred_zones": ["north"]})
+            ],
+            "driver_profile": [{"name": "driver_1001_updated", "age": "30"}],
+        }
+    )
+    print(event_df)
+    store.push("driver_stats_push_source", event_df, to=PushMode.ONLINE_AND_OFFLINE)
+
+    print("\n--- Online features again with updated values from a stream push---")
+    fetch_online_features(store, source="push")
+
+    print("\n--- Run feast teardown ---")
+    subprocess.run(["feast", "teardown"])
 
 
-def fetch_historical_features(store: FeatureStore, source_df: pd.DataFrame):
-    entity_df = source_df[["sample_id", "event_timestamp"]].head(3)
-    return store.get_historical_features(
+def fetch_historical_features_entity_df(store: FeatureStore, for_batch_scoring: bool):
+    # Note: see https://docs.feast.dev/getting-started/concepts/feature-retrieval for more details on how to retrieve
+    # for all entities in the offline store instead
+    entity_df = pd.DataFrame.from_dict(
+        {
+            # entity's join key -> entity values
+            "driver_id": [1001, 1002, 1003],
+            # "event_timestamp" (reserved key) -> timestamps
+            "event_timestamp": [
+                datetime(2021, 4, 12, 10, 59, 42),
+                datetime(2021, 4, 12, 8, 12, 10),
+                datetime(2021, 4, 12, 16, 40, 26),
+            ],
+            # (optional) label name -> label values. Feast does not process these
+            "label_driver_reported_satisfaction": [1, 5, 3],
+            # values we're using for an on-demand transformation
+            "val_to_add": [1, 2, 3],
+            "val_to_add_2": [10, 20, 30],
+        }
+    )
+    # For batch scoring, we want the latest timestamps
+    if for_batch_scoring:
+        entity_df["event_timestamp"] = pd.to_datetime("now", utc=True)
+
+    training_df = store.get_historical_features(
         entity_df=entity_df,
         features=[
-            "iris_measurements:sepal length (cm)",
-            "iris_measurements:sepal width (cm)",
-            "iris_measurements:petal length (cm)",
-            "iris_measurements:petal width (cm)",
-            "iris_engineered_features:sepal_area",
-            "iris_engineered_features:petal_area",
-            "iris_engineered_features:sepal_to_petal_length_ratio",
-            "iris_engineered_features:petal_length_bin",
+            "driver_hourly_stats:conv_rate",
+            "driver_hourly_stats:acc_rate",
+            "driver_hourly_stats:avg_daily_trips",
+            "transformed_conv_rate:conv_rate_plus_val1",
+            "transformed_conv_rate:conv_rate_plus_val2",
         ],
     ).to_df()
+    print(training_df.head())
 
 
-def fetch_batch_scoring_features(store: FeatureStore, source_df: pd.DataFrame):
-    entity_df = source_df[["sample_id"]].head(3).copy()
-    entity_df["event_timestamp"] = pd.Timestamp.now(tz="UTC")
-    return store.get_historical_features(
-        entity_df=entity_df,
-        features=iris_feature_service,
-    ).to_df()
-
-
-def fetch_online_features(store: FeatureStore, use_feature_service: bool = False):
+def fetch_online_features(store, source: str = ""):
     entity_rows = [
-        {"sample_id": 0},
-        {"sample_id": 1},
+        # {join_key: entity_value}
+        {
+            "driver_id": 1001,
+            "val_to_add": 1000,
+            "val_to_add_2": 2000,
+        },
+        {
+            "driver_id": 1002,
+            "val_to_add": 1001,
+            "val_to_add_2": 2002,
+        },
     ]
-    features = (
-        store.get_feature_service("iris_feature_service")
-        if use_feature_service
-        else [
-            "iris_measurements:sepal length (cm)",
-            "iris_measurements:sepal width (cm)",
-            "iris_engineered_features:sepal_area",
-            "iris_engineered_features:petal_area",
+    if source == "feature_service":
+        features_to_fetch = store.get_feature_service("driver_activity_v1")
+    elif source == "push":
+        features_to_fetch = store.get_feature_service("driver_activity_v3")
+    else:
+        features_to_fetch = [
+            "driver_hourly_stats:acc_rate",
+            "driver_hourly_stats:driver_metadata",
+            "driver_hourly_stats:driver_config",
+            "driver_hourly_stats:driver_profile",
+            "transformed_conv_rate:conv_rate_plus_val1",
+            "transformed_conv_rate:conv_rate_plus_val2",
         ]
-    )
-    return store.get_online_features(
-        features=features,
+    returned_features = store.get_online_features(
+        features=features_to_fetch,
         entity_rows=entity_rows,
-    ).to_df()
-
-
-def assert_expected_features(features_df: pd.DataFrame):
-    expected_features = {
-        "sepal length (cm)",
-        "sepal width (cm)",
-        "petal length (cm)",
-        "petal width (cm)",
-        "sepal_area",
-        "petal_area",
-        "sepal_to_petal_length_ratio",
-        "petal_length_bin",
-    }
-    assert expected_features.issubset(features_df.columns)
-
-
-def assert_online_features(features_df: pd.DataFrame):
-    assert len(features_df) == 2
-    assert features_df.drop(columns=["sample_id"]).notna().all().all()
+    ).to_dict()
+    for key, value in sorted(returned_features.items()):
+        print(key, " : ", value)
 
 
 if __name__ == "__main__":

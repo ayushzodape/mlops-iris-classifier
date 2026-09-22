@@ -1,0 +1,76 @@
+
+K
++
+	sample_id"	sample_idJiris_feature_repo
+£íÊÕĞş§·£íÊÕĞş§·
+H
+(
+__dummy"
+__dummy_idJiris_feature_repo
+£íÊÕø¯¯·£íÊÕø¯¯·1"$f55fef69-657c-43a8-a3ad-e550ef944066*›ñÊÕğë’‰2œ
+á
+iris_engineered_featuresiris_feature_repo	sample_id"
+
+sepal_area"
+
+petal_area"
+sepal_to_petal_length_ratio"
+petal_length_bin2€ç„:®event_timestamp*created_timestampZdata/iris_features.parquetŠ1feast.infra.offline_stores.file_source.FileSource¢iris_features_source’£íÊÕ€ı‚¦"£íÊÕè›·@b
+	sample_id’latest6
+£íÊÕÈª¶·›ñÊÕÀ…œ÷
+›ŠÆÆØä•à˜ñÊÕ02˜
+İ
+iris_measurementsiris_feature_repo	sample_id"
+sepal length (cm)"
+sepal width (cm)"
+petal length (cm)"
+petal width (cm)2€ç„:®event_timestamp*created_timestampZdata/iris_features.parquetŠ1feast.infra.offline_stores.file_source.FileSource¢iris_features_source’£íÊÕ€ı‚¦"£íÊÕè›·@b
+	sample_id’latest6
+£íÊÕğÖ·›ñÊÕÀ«ƒ‰
+›ŠÆÆØÛ˜à˜ñÊÕ0:Œ
+ë
+iris_feature_serviceiris_feature_repoœ
+iris_measurements
+sepal length (cm)
+sepal width (cm)
+petal length (cm)
+petal width (cm)*created_timestamp:created_timestampBzevent_timestamp*created_timestampZdata/iris_features.parquet¢iris_features_source’£íÊÕ€ı‚¦"£íÊÕè›·ZfeatureView 
+iris_engineered_features
+
+sepal_area
+
+petal_area
+sepal_to_petal_length_ratio
+petal_length_bin*created_timestamp:created_timestampBzevent_timestamp*created_timestampZdata/iris_features.parquet¢iris_features_source’£íÊÕ€ı‚¦"£íÊÕè›·ZfeatureView
+£íÊÕˆ‚‚¸£íÊÕˆ‚‚¸R×
+ì
+,feast.infra.online_stores.sqlite.SqliteTable"»
+Œ/home/ayush/Documents/SVKM IoT Work/5th Sem/MLOps/mlops-iris-classifier/practical5_feast/iris_feature_repo/feature_repo/data/online_store.db*iris_feature_repo_iris_engineered_features
+å
+,feast.infra.online_stores.sqlite.SqliteTable"´
+Œ/home/ayush/Documents/SVKM IoT Work/5th Sem/MLOps/mlops-iris-classifier/practical5_feast/iris_feature_repo/feature_repo/data/online_store.db#iris_feature_repo_iris_measurementsbÂevent_timestamp*created_timestampZdata/iris_features.parquetŠ1feast.infra.offline_stores.file_source.FileSource¢iris_features_sourceªiris_feature_repo’£íÊÕ€ı‚¦"£íÊÕè›·Š3
+
+iris_feature_repo
+£íÊÕ íÜ©£íÊÕ íÜ©’ã
+ô
+iris_engineered_featuresiris_feature_repo"feature_view*‚
+á
+iris_engineered_featuresiris_feature_repo	sample_id"
+
+sepal_area"
+
+petal_area"
+sepal_to_petal_length_ratio"
+petal_length_bin2€ç„:®event_timestamp*created_timestampZdata/iris_features.parquetŠ1feast.infra.offline_stores.file_source.FileSource¢iris_features_source’£íÊÕ€ı‚¦"£íÊÕè›·@b
+	sample_id’latest
+£íÊÕÈª¶·£íÊÕÈª¶·2£íÊÕÈÓÒ·B$9a179072-a3af-45ab-93d4-30eced94cd5a
+é
+iris_measurementsiris_feature_repo"feature_view*ş
+İ
+iris_measurementsiris_feature_repo	sample_id"
+sepal length (cm)"
+sepal width (cm)"
+petal length (cm)"
+petal width (cm)2€ç„:®event_timestamp*created_timestampZdata/iris_features.parquetŠ1feast.infra.offline_stores.file_source.FileSource¢iris_features_source’£íÊÕ€ı‚¦"£íÊÕè›·@b
+	sample_id’latest
+£íÊÕğÖ·£íÊÕğÖ·2£íÊÕğ˜ı·B$02308386-9e2e-4f47-aa95-a7e1e342d93d
