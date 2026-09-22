@@ -1,0 +1,4 @@
+.venv-feast/
+**/__pycache__/
+**/*.py[cod]
+**/data/*.db
