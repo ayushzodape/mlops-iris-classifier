@@ -226,8 +226,7 @@ for model_name, model in models.items():
             model,
             name="model",
             serialization_format="pickle"
-)
-
+        )
 
         # -------------------------------------------------
         # Store result
