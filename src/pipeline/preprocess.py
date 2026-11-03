@@ -8,7 +8,10 @@ import logging
 
 import pandas as pd
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 logger = logging.getLogger("preprocess")
 
 NUMERIC_COLS = [
@@ -47,6 +50,9 @@ def preprocess(input_path: str, output_path: str) -> pd.DataFrame:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", default="data/raw/iris_raw.csv")
-    parser.add_argument("--output", default="data/processed/iris_preprocessed.csv")
+    parser.add_argument(
+        "--output",
+        default="data/processed/iris_preprocessed.csv"
+    )
     args = parser.parse_args()
     preprocess(args.input, args.output)

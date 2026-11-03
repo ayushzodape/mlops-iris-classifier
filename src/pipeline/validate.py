@@ -10,7 +10,10 @@ import sys  # interacts with the Python system
 
 import pandas as pd
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 logger = logging.getLogger("validate")
 
 EXPECTED_COLUMNS = {
@@ -52,7 +55,9 @@ def validate(input_path: str) -> pd.DataFrame:
         out_of_range = df[(df[col] < low) | (df[col] > high)]
         if not out_of_range.empty:
             errors.append(
-                f"{len(out_of_range)} rows out of expected range for '{col}' ({low}-{high})")
+                f"{len(out_of_range)} rows out of expected range "
+                f"for '{col}' ({low}-{high})"
+            )
 
     if errors:
         raise DataValidationError(

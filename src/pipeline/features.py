@@ -8,7 +8,10 @@ import logging
 
 import pandas as pd
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 logger = logging.getLogger("features")
 
 
@@ -33,7 +36,10 @@ def engineer_features(input_path: str, output_path: str) -> pd.DataFrame:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input", default="data/processed/iris_preprocessed.csv")
+    parser.add_argument(
+        "--input",
+        default="data/processed/iris_preprocessed.csv"
+    )
     parser.add_argument("--output", default="data/processed/iris_features.csv")
     args = parser.parse_args()
     engineer_features(args.input, args.output)

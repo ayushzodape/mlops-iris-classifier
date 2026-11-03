@@ -11,7 +11,10 @@ from datetime import datetime, timezone
 import pandas as pd
 from sklearn.datasets import load_iris
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 logger = logging.getLogger("collect")
 
 
